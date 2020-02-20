@@ -1,0 +1,22 @@
+table {
+  border: solid 1px #f4f4f4;
+  border-collapse: collapse;
+
+  td, th {
+  vertical-align:top; border: solid 1px #f4f4f4; padding: 0 0.5rem; text-align: left;
+
+    *:first-child { margin-top: 0; }
+  }
+  thead tr { background: #f0f0f0; }
+
+  tr:nth-child(even) {
+    background: #f8f8f8;
+  }
+
+}
+.arr-table { margin-bottom: 2rem; }
+.arr-tr { margin-bottom: 1rem; padding: 0.5rem 0; }
+.arr-tr.even { background: #f0f0f0; }
+.arr-th { font-size: (14rem/16); }
+.arr-td { margin-bottom: 0.5rem; }
+.arr-td>*:first-child { margin-top: 0; }
