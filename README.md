@@ -1,5 +1,7 @@
 # Responsive tables.
 
+See the [demo](dist/index.html)
+
 ## Build
 
 Use one of:
@@ -33,6 +35,36 @@ div.arr-table
   ... repeated for all rows ...
 
 ```
+
+### Filters and sorts
+
+To use either a filter or a sort you must apply `data-cast="<casttype>"`
+to the `<th>` cell for that column, where `<casttype>` is one of: `text`,
+`number`, `date`.
+
+Filters are available by adding `data-filter="<filtertype>"` where
+`<filtertype>` is one of:
+
+- `text` Free text search (substring, case independent)
+
+- `values` Drop-down (select) element from unique possibilities, shows
+  count.
+
+- `range` Not implemented yet.
+
+To make a column sortable simply add `data-sortable=""` to the `<th>`.
+
+The filters UI looks like this:
+
+```
+div.arr-filters
+  div.arr-filter.arr-filter--<casttype>
+  ...
+```
+
+Where `<casttype>` is as above, or `sort` for the sort by select.
+
+
 
 # Copyright, Licence, Author
 

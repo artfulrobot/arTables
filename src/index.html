@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ResponsiveTable demo</title>
     <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700&display=swap" rel="stylesheet">
-    <link href="demo.css" rel="stylesheet">
+    <link href="../dist/demo.css" rel="stylesheet">
     <style>
     html { font-size: 16px; }
     body { font-family: Lato, sans-serif; }
@@ -13,20 +13,26 @@
   </head>
   <body style="margin:0; padding:0;">
     <script src="arTables.js"></script>
-
-    <table id="t1" class="ar-responsive" data-min-width="600">
-      <thead><tr><th>Name</th><th>Shoe size</th><th>Biog</th></tr></thead>
-      <tbody>
-        <tr><td>Rich</td><td>9ish</td><td>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,</p>
-            <p>But also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-          </td></tr>
-      <tr><td>Wilma</td><td>7ish</td><td>
-            <p>But also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,</p>
-          </td></tr>
-      </tbody>
-    </table>
+    <div class="content">
+      <table id="t1" class="ar-responsive" data-min-width="600">
+        <thead><tr>
+            <th data-sortable="" data-filter="values" data-cast="text" >Name</th>
+            <th data-sortable="" data-cast="number" >Shoe size</th>
+            <th data-filter="text" data-cast="text">Biog</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>Rich</td><td>9ish</td><td>
+                <p>This is some dummy text</p>
+              </td></tr>
+              <tr><td>Wilma</td><td>7ish</td><td>
+                  <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </td></tr>
+                <tr><td>Barney</td><td>14ish</td><td>
+                    <p>I don't know why Barney has big feet.</p>
+                  </td></tr>
+          </tbody>
+      </table>
+    </div>
 
   </body>
 </html>
