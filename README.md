@@ -1,6 +1,7 @@
 # Responsive tables.
 
-See the [demo](dist/index.html)
+Make normal (and simple) HTML tables responsive, filterable and sortable.
+8kB library. See the [demo](https://artfulrobot.uk/lil/arTables/).
 
 ## Build
 
