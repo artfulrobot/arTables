@@ -4,15 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ResponsiveTable demo</title>
+    <!-- Note: CSS is left to you, the demo CSS is just for the demo. -->
     <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700&display=swap" rel="stylesheet">
-    <link href="../dist/demo.css" rel="stylesheet">
+    <link href="../dist/demo.css" rel="stylesheet"><!-- for development, will fail in production -->
+    <link href="demo.css" rel="stylesheet"><!-- for the demo in dist/, will fail to load in development -->
     <style>
     html { font-size: 16px; }
     body { font-family: Lato, sans-serif; }
     </style>
   </head>
   <body style="margin:0; padding:0;">
-    <script src="arTables.js"></script>
+
+
     <div class="content">
       <table id="t1" class="ar-responsive" data-min-width="600">
         <thead>
@@ -46,9 +49,12 @@
             </tr>
           </tbody>
       </table>
+
+      <p>Version 1.0 see README.md on <a href="https://github.com/artfulrobot/arTables">Git Hub</a></p>
     </div>
 
-    <p>Version 1.0 <a href="https://github.com/artfulrobot/arTables">Git Hub</a></p>
 
+
+    <script src="arTables.js" defer></script>
   </body>
 </html>
