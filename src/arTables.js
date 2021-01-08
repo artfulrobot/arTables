@@ -77,6 +77,10 @@ class ARResponsiveTable {
       if (typeof cell.dataset.cast !== 'string') {
         return;
       }
+      // Define a cast object.
+      // The cast object knows which header cell defined it,
+      // the index of the cell in the row, the type of cast (e.g. text|number|date)
+      //
       const c = { header: cell, idx, type: cell.dataset.cast };
       if (cell.dataset.filter === 'values') {
         // We need unique values for this
@@ -109,23 +113,29 @@ class ARResponsiveTable {
           cell.arData = parseFloat(cell.textContent);
         }
         else {
+          // We need to store a unique (i.e. trimmed, lower case if necessary) list,
+          // But for presentation we need the (first) original trimmed but not lower case version.
+          //
+          // Trim whitespace
+          var trimmed = cell.textContent.replace(/^\s*(.*?)\s*$/, '$1');
           // Turn it lower case now for quicker searching, if using text search.
           if (cast.type === 'text') {
-            cell.arData = cell.textContent.toLocaleLowerCase();
+            cell.arData = trimmed.toLocaleLowerCase();
           }
           else {
-            cell.arData = cell.textContent;
+            cell.arData = trimmed;
           }
         }
 
         // Do we need to index by value?
         if ('rowsByValue' in cast) {
           if (!(cell.arData in cast.rowsByValue)) {
-            cast.rowsByValue[cell.textContent] = [tr];
+            cast.rowsByValue[cell.arData] = {
+              rows: [],
+              label: trimmed,
+            };
           }
-          else {
-            cast.rowsByValue[cell.textContent].push(tr);
-          }
+          cast.rowsByValue[cell.arData].rows.push(tr);
         }
 
       });
@@ -238,14 +248,21 @@ class ARResponsiveTable {
 
     s.innerHTML = '<option value="">- Any -</option>';
     var o;
+    // The keys of rowsByValue are trimmed and lower cased.
+    // However, we have no guarantee they're in alpha order, so we sort those now.
+    var sorted = [];
     for (var v in cast.rowsByValue) {
       if (cast.rowsByValue.hasOwnProperty(v)) {
-        o = document.createElement('option');
-        o.value = v.toLocaleLowerCase();
-        o.textContent = `${v} (${cast.rowsByValue[v].length})`;
-        s.appendChild(o);
+        sorted.push({key: v, label:  `${cast.rowsByValue[v].label} (${cast.rowsByValue[v].rows.length})`});
       }
     }
+    sorted.sort((a, b) => (a.key < b.key) ? -1 : (a.key > b.key) ? 1 : 0);
+    sorted.forEach(i => {
+        o = document.createElement('option');
+        o.value = i.key;
+        o.textContent = i.label;
+        s.appendChild(o);
+    });
 
     const d = document.createElement('div');
     d.classList.add('arr-filter', 'arr-filter--values');

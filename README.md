@@ -65,9 +65,14 @@ div.arr-filters
 
 Where `<casttype>` is as above, or `sort` for the sort by select.
 
+# Changelog
 
+- v1.0.1 When creating select options, ignore whitespace in text data and
+  sort.
 
-# Copyright, Licence, Author
+- v1.0.0 Initial release
+
+## Copyright, Licence, Author
 
 Author: Rich Lott / Artful Robot forums@artfulrobot.uk
 
