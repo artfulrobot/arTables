@@ -1,7 +1,9 @@
 # Responsive tables.
 
 Make normal (and simple) HTML tables responsive, filterable and sortable.
-8kB library. See the [demo](https://artfulrobot.uk/lil/arTables/).
+8kB library.
+
+See the [demo](https://artfulrobot.uk/lil/arTables/).
 
 ## Tutorial
 
@@ -84,6 +86,8 @@ colours, whereas for hobbies we just want to search the text.
    ```
 
 Save your page and check out your fancy new table!
+
+You may find the [demo page](https://artfulrobot.uk/lil/arTables/) helpful. You can use your browser's View Source option on that demo page to see the table (or take a look at it on [github](https://github.com/artfulrobot/arTables/blob/master/src/index.html))
 
 
 
