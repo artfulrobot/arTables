@@ -113,11 +113,13 @@ div.arr-table
 
 ```
 
-### Reference: Filters and sorts
+## Reference: Filters, sorts and aggregates
 
-To use either a filter or a sort you must apply `data-cast="<casttype>"`
+To use any of these features you must apply `data-cast="<casttype>"`
 to the `<th>` cell for that column, where `<casttype>` is one of: `text`,
 `number`, `date`.
+
+### Filters
 
 Filters are available by adding `data-filter="<filtertype>"` where
 `<filtertype>` is one of:
@@ -127,9 +129,19 @@ Filters are available by adding `data-filter="<filtertype>"` where
 - `values` Drop-down (select) element from unique possibilities, shows
   count.
 
-- `range` Not implemented yet.
+### Sortable columns
 
 To make a column sortable simply add `data-sortable=""` to the `<th>`.
+
+### Aggregates
+
+You can add a row of aggregates. The following functions are supported:
+`count`, `sum`, `avg`, `min`, `max`, `%col`. Each different function
+encountered leads to an additional row being added. e.g. Adding
+`data-aggregate="count,sum"` to a column would add two rows, one called
+"Count" and one called "Total".
+
+### HTML produced for filters and sort UI
 
 The filters UI looks like this:
 
@@ -141,7 +153,11 @@ div.arr-filters
 
 Where `<casttype>` is as above, or `sort` for the sort by select.
 
+
+
 ## Reference: Changelog
+
+- v1.1.0 Added aggregate rows.
 
 - v1.0.1 When creating select options, ignore whitespace in text data and
   sort.

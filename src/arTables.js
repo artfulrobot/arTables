@@ -11,22 +11,28 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with arTables.  If not, see <https://www.gnu.org/licenses/>.
+//  along with arTables. If not, see <https://www.gnu.org/licenses/>.
 
 class ARResponsiveTable {
 
   constructor(table) {
+    this.supportedAggregates = [
+      {name: 'count', label: 'Count' },
+      {name: 'sum',   label: 'Total' },
+      {name: 'min',   label: 'Min' },
+      {name: 'max',   label: 'Max' },
+      {name: 'avg',   label: 'Average' },
+    ];
     if (table.arTable) {
       // Already initialised.
       return;
     }
     if (typeof ARResponsiveTable.lastId === 'undefined') {
-      console.log("setting lastId");
       ARResponsiveTable.lastId = 1;
     }
-    console.log(typeof ARResponsiveTable.lastId);
     table.arTable = this;
     this.tableNode = table;
+    this.showingFiltered = false;
     window.addEventListener('resize', this.handleResize.bind(this));
 
     // Parse the table.
@@ -61,8 +67,136 @@ class ARResponsiveTable {
     }
 
     this.parseTableData();
+    this.addAggregateRows();
+    this.calculateAggregates();
     this.handleResize();
     this.createFilterUi();
+  }
+
+  calculateAggregates() {
+    // Loop every column for which we have a cast.
+    this.casts.forEach(cast => {
+
+      // Reset
+      if ('count' in cast.aggregates) {
+        cast.aggregates.count.all = 0;
+        cast.aggregates.count.filtered = 0;
+      }
+      if ('sum' in cast.aggregates) {
+        cast.aggregates.sum.all = 0;
+        cast.aggregates.sum.filtered = 0;
+      }
+      if ('min' in cast.aggregates) {
+        cast.aggregates.min.all = 0;
+        cast.aggregates.min.filtered = 0;
+      }
+      if ('max' in cast.aggregates) {
+        cast.aggregates.max.all = 0;
+        cast.aggregates.max.filtered = 0;
+      }
+
+      // Loop each row in this column.
+      this.bodyTrs.forEach((tr, trIndex) => {
+        // Get reference to the cell we're working on in this row and column.
+        const cell = tr.children[cast.idx];
+        if ('count' in cast.aggregates) {
+          cast.aggregates.count.all += 1;
+          if (tr.arFiltered) {
+            cast.aggregates.count.filtered += 1;
+          }
+        }
+        if (cast.type === 'number') {
+          if ('sum' in cast.aggregates) {
+            cast.aggregates.sum.all += cell.arData;
+            if (tr.arFiltered) {
+              cast.aggregates.sum.filtered += cell.arData;
+            }
+          }
+          if ('min' in cast.aggregates) {
+            if (cast.aggregates.min.all === null || cast.aggregates.min.all < cell.arData) {
+              cast.aggregates.min.all = cell.arData;
+            }
+            if (tr.arFiltered) {
+              if (cast.aggregates.min.filtered === null || cast.aggregates.min.filtered < cell.arData) {
+                cast.aggregates.min.filtered = cell.arData;
+              }
+            }
+          }
+          if ('max' in cast.aggregates) {
+            if (cast.aggregates.max.all === null || cast.aggregates.max.all > cell.arData) {
+              cast.aggregates.max.all = cell.arData;
+            }
+            if (tr.arFiltered) {
+              if (cast.aggregates.max.filtered === null || cast.aggregates.max.filtered > cell.arData) {
+                cast.aggregates.max.filtered = cell.arData;
+              }
+            }
+          }
+        }
+      });
+      // We've processed every row, so we can work out averages now.
+      if (cast.type === 'number' && 'avg' in cast.aggregates) {
+        cast.aggregates.avg.all = cast.aggregates.sum.all / cast.aggregates.count.all;
+        cast.aggregates.avg.filtered = cast.aggregates.sum.filtered / cast.aggregates.count.filtered;
+      }
+
+      // And now update our aggregate cells.
+      ['count', 'sum'].forEach(agName => {
+        if (agName in cast.aggregates) {
+          const ag = cast.aggregates[agName];
+          ag.cell.textContent = this.showingFiltered
+            ? ag.filtered + '/' + ag.all + ' (' + Math.round(ag.filtered * 100 / ag.all)  + '%)'
+            : ag.all;
+          if (ag.arCell) {
+            ag.arCell.textContent = ag.cell.textContent;
+          }
+        }
+      });
+      ['min', 'max', 'avg'].forEach(agName => {
+        if (agName in cast.aggregates) {
+          const ag = cast.aggregates[agName];
+          ag.cell.textContent = this.showingFiltered
+            ? ag.filtered
+            : ag.all;
+          if (ag.arCell) {
+            ag.arCell.textContent = ag.cell.textContent;
+          }
+          else {
+            console.warn("not updating cell", ag);
+          }
+        }
+      });
+
+    });
+  }
+
+  addAggregateRows() {
+    const tbody = this.tableNode.querySelector('tbody');
+    this.supportedAggregates.forEach(ag => {
+      if (ag.name in this.aggregateFunctions) {
+
+        // Create a row for this.
+        const agTr = document.createElement('tr');
+        agTr.classList.add('aggregate', ag.name);
+        const agTdTitle = document.createElement('td');
+        agTdTitle.textContent = ag.label;
+        agTr.append(agTdTitle);
+
+        // Now add the aggregates.
+        this.headerCells.slice(1).forEach((cell, idx) => {
+          const agTd = document.createElement('td');
+          if (cell.cast) {
+            // Does this header use this aggregate?
+            if (ag.name in cell.cast.aggregates) {
+              cell.cast.aggregates[ag.name].cell = agTd;
+              //agTd.textContent = ag.accessor(cell.cast);
+            }
+          }
+          agTr.appendChild(agTd);
+        });
+        tbody.appendChild(agTr);
+      }
+    });
   }
 
   parseTableData() {
@@ -73,6 +207,7 @@ class ARResponsiveTable {
     // Scan headers for any that have casts.
     this.casts = [];
     this.indexes = {};
+    this.aggregateFunctions = {};
     this.headerCells.forEach((cell, idx) => {
       if (typeof cell.dataset.cast !== 'string') {
         return;
@@ -80,15 +215,35 @@ class ARResponsiveTable {
       // Define a cast object.
       // The cast object knows which header cell defined it,
       // the index of the cell in the row, the type of cast (e.g. text|number|date)
-      //
       const c = { header: cell, idx, type: cell.dataset.cast };
       if (cell.dataset.filter === 'values') {
         // We need unique values for this
         c.rowsByValue = {};
       }
       c.sortable = (cell.dataset.sortable !== undefined);
+      c.aggregates = {};
+
+      if (cell.dataset.aggregates) {
+        // Aggregates needed.
+        cell.dataset.aggregates.split(/\s*,\s*/).forEach( aggregateFunction => {
+          if (!aggregateFunction.match(/^(sum|count|avg|min|max)$/)) {
+            console.warn("arTables: invalid aggregate function", { aggregateFunction, cast, cell });
+            return;
+          }
+          // Keep track of all the functions in use; this will determine what
+          // rows we need to append.
+          this.aggregateFunctions[aggregateFunction] = true;
+
+          // Create a property on our cast so we can easily see whether there
+          // will be a value for this.
+          c.aggregates[aggregateFunction] = {};
+        });
+      }
 
       this.casts.push(c);
+      // Store reference to cast on the header cell, too.
+      cell.cast = c;
+      //console.log("complete cast", c);
     });
 
     // @todo
@@ -99,10 +254,15 @@ class ARResponsiveTable {
     }
 
     // We have some casts, parse the data.
+    // Once the data has been cast, it is stored in a property on the table cell DOM node called arData.
     this.bodyTrs.forEach(tr => {
 
+      // i.e. foreach column with a filter, sort or aggregate...
       this.casts.forEach(cast => {
+        // Get reference to the cell we're working on in this row and column.
         const cell = tr.children[cast.idx];
+
+        // Parse/cast the text data
         if (cell === undefined) {
           return;
         }
@@ -127,7 +287,8 @@ class ARResponsiveTable {
           }
         }
 
-        // Do we need to index by value?
+        // Do we need to index by value for this cast?
+        // If so, update the *cast's* rowsByValue object using the cast data as the key, and storing an object with {label, rows} where rows is an array of matching rows.
         if ('rowsByValue' in cast) {
           if (!(cell.arData in cast.rowsByValue)) {
             cast.rowsByValue[cell.arData] = {
@@ -141,7 +302,6 @@ class ARResponsiveTable {
       });
     });
 
-    console.log(this);
   }
 
   createFilterUi() {
@@ -283,6 +443,7 @@ class ARResponsiveTable {
     // Make a copy of all matching Trs, it will make sorting faster.
     var matchingTrs = [];
 
+    // Nb. bodyTrs is all the rows before we added aggregates.
     this.bodyTrs.forEach(tr => {
 
       var match = true;
@@ -298,6 +459,8 @@ class ARResponsiveTable {
       });
 
       if (match) {
+        // This row matches, remove the style that hid it.
+        tr.arFiltered = true;
         tr.style.display = '';
         if (this.narrowVersion) {
           tr.arrCard.style.display = '';
@@ -305,12 +468,16 @@ class ARResponsiveTable {
         matchingTrs.push(tr);
       }
       else {
+        tr.arFiltered = false;
+        // This row does not match, add style to hide it.
         tr.style.display = 'none';
         if (this.narrowVersion) {
           tr.arrCard.style.display = 'none';
         }
       }
     });
+
+    this.showingFiltered = (matchingTrs.length < this.bodyTrs.length);
 
     // Apply sort.
     if ('sortBy' in this) {
@@ -319,7 +486,10 @@ class ARResponsiveTable {
         var [ direction, idx ] = this.sortBy.value.split(':');
         var cast = this.casts[idx];
 
-        matchingTrs.sort((a, b) => {
+        // Nb. we sort backwards(!) because we insert the matches into the
+        // table using prepend (this is so the aggregate rows stay at the
+        // bottom)
+        matchingTrs.sort((b, a) => {
           var cellA = a.children[idx];
           var cellB = b.children[idx];
           // First on cell existence.
@@ -342,13 +512,15 @@ class ARResponsiveTable {
       if (matchingTrs.length > 0) {
         const tbody = matchingTrs[0].parentElement;
         matchingTrs.forEach(tr => {
-          tbody.appendChild(tr);
+          tbody.insertAdjacentElement('afterbegin', tr);
           if (this.narrowVersion) {
-            this.narrowVersion.appendChild(tr.arrCard);
+            this.narrowVersion.insertAdjacentElement('afterbegin', tr.arrCard);
           }
         });
       }
     }
+
+    this.calculateAggregates();
   }
 
   handleResize() {
@@ -406,6 +578,31 @@ class ARResponsiveTable {
 
       this.narrowVersion.appendChild(arrTr);
     });
+    // Aggregate row.
+    const agDiv = document.createElement('div');
+    agDiv.classList.add('aggregate', 'arr-tr');
+
+    this.casts.forEach(cast => {
+      this.supportedAggregates.forEach(ag => {
+        if (ag.name in cast.aggregates) {
+          const h = document.createElement('div');
+          h.classList.add('arr-th');
+          h.textContent = cast.header.textContent + ' ' + ag.label;
+          agDiv.appendChild(h);
+
+          const agValue = document.createElement('div')
+          agValue.classList.add('arr-td');
+          // Copy existing cell's data (we are always called after calculateAggregates)
+          agValue.textContent = cast.aggregates[ag.name].cell.textContent;
+          agDiv.appendChild(agValue);
+          // Keep a ref for easy updating.
+          cast.aggregates[ag.name].arCell = agValue;
+        }
+      });
+    });
+    if (agDiv.children.length > 0) {
+      this.narrowVersion.appendChild(agDiv);
+    }
 
     this.tableNode.insertAdjacentElement('afterend', this.narrowVersion);
 

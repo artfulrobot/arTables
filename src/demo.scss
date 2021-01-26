@@ -26,12 +26,16 @@ table {
   tr:nth-child(even) {
     background: #f8f8f8;
   }
+  tr.aggregate {
+    font-style: italic;
+  }
 
 }
 .arr-table { margin-bottom: 2rem; }
 .arr-tr { margin-bottom: 1rem; padding: 0.5rem 1rem; }
 .arr-tr.even { background: #f0f0f0; }
 .arr-tr.odd { background: #f8f8f8; }
+.arr-tr.aggregate { font-style: italic; background: #f8f8f8;}
 .arr-th { font-size: (14rem/16); }
 .arr-td { margin-bottom: 0.5rem; }
 .arr-td>*:first-child { margin-top: 0; }

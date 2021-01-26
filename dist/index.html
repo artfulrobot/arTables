@@ -15,7 +15,11 @@
   </head>
   <body style="margin:0; padding:0;">
 
+    <h1>arTables demo</h1>
+    <p>View the HTML source in your browser’s dev tools, or <a href="https://github.com/artfulrobot/arTables/blob/main/src/index.html">online</a></p>
 
+    <h2>Demo 1</h2>
+    <p>This table uses sortable columns, text and number filters.</p>
     <div class="content">
       <table id="t1" class="ar-responsive" data-min-width="600">
         <thead>
@@ -58,7 +62,37 @@
           </tbody>
       </table>
 
-      <p>Version 1.0.1 see README.md on <a href="https://github.com/artfulrobot/arTables">Git Hub</a></p>
+      <h2>Demo 2</h2>
+      <p>This table shows how to use aggregate functions (count, sum, min, max, avg) - all are in use here but you can choose which you want per column.</p>
+      <table id="t1" class="ar-responsive" data-min-width="600">
+        <thead>
+          <tr>
+            <th data-sortable="" data-filter="values" data-cast="text" >Name</th>
+            <th data-sortable="" data-cast="number" data-aggregates="count,sum,min,max,avg" >Shoe size</th>
+          </tr>
+        </thead>
+          <tbody>
+            <tr>
+              <td>Rich</td>
+              <td>9</td>
+            </tr>
+            <tr>
+              <td>Wilma</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <td>Barney</td>
+              <td>14</td>
+            </tr>
+            <tr>
+              <td> Barney
+              </td>
+              <td>14.5</td>
+            </tr>
+          </tbody>
+      </table>
+
+      <p>Version 1.1.0 see README.md on <a href="https://github.com/artfulrobot/arTables">Git Hub</a></p>
     </div>
 
 
